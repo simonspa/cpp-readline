@@ -16,3 +16,7 @@ set_target_properties(
     SOVERSION 1
 )
 target_link_libraries(${lib_name} ${Readline_LIBRARY})
+INSTALL(TARGETS ${lib_name}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)

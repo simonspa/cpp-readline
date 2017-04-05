@@ -7,26 +7,27 @@
 #include <memory>
 
 namespace CppReadline {
+    /**
+     * @brief This is the function type that is used to interface with the Console class.
+     *
+     * These are the functions that are going to get called by Console
+     * when the user types in a message. The vector will hold the
+     * command elements, and the function needs to return its result.
+     * The result can either be Quit (-1), OK (0), or an arbitrary
+     * error (>=1).
+     */
+    using Arguments = std::vector<std::string>;
+    using CommandFunction = std::function<int(const Arguments &)>;
+
+    enum ReturnCode {
+        Quit = -1,
+        Ok = 0,
+        Error = 1 // Or greater!
+    };
+
+
     class Console {
         public:
-            /**
-             * @brief This is the function type that is used to interface with the Console class.
-             *
-             * These are the functions that are going to get called by Console
-             * when the user types in a message. The vector will hold the
-             * command elements, and the function needs to return its result.
-             * The result can either be Quit (-1), OK (0), or an arbitrary
-             * error (>=1).
-             */
-            using Arguments = std::vector<std::string>;
-            using CommandFunction = std::function<int(const Arguments &)>;
-
-            enum ReturnCode {
-                Quit = -1,
-                Ok = 0,
-                Error = 1 // Or greater!
-            };
-
             /**
              * @brief Basic constructor.
              *

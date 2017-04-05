@@ -4,7 +4,7 @@
 #include <string>
 
 namespace cr = CppReadline;
-using ret = cr::Console::ReturnCode;
+using ret = cr::ReturnCode;
 
 unsigned info(const std::vector<std::string> &) {
     std::cout << "Welcome to the example console. This command does not really\n"

@@ -60,8 +60,10 @@ int main() {
     // Here we register a new command. The string "info" names the command that
     // the user will have to type in in order to trigger this command (it can
     // be different from the function name).
-    c.registerCommand("info", info);
-    c.registerCommand("calc", calc);
+    c.registerCommand("info", info, "Print information",0);
+    c.registerCommand("calc", calc,
+		      "Perform the calculation (NUM1 OPERATOR[*+/-] NUM2) and present the result",
+		      3,"NUM1 OPERATOR NUM2");
 
     // Here we call one of the defaults command of the console, "help". It lists
     // all currently registered commands within the console, so that the user

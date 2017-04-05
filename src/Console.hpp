@@ -25,6 +25,20 @@ namespace CppReadline {
         Error = 1 // Or greater!
     };
 
+    class ConsoleCommand {
+    public:
+        ConsoleCommand() : func(), help(""), arglist(""), args(0) {};
+        ConsoleCommand(CommandFunction f, std::string h, size_t n, std::string a = "") :
+	    func(f),
+	    help(h),
+	    arglist(a),
+	    args(n)
+        {};
+        CommandFunction func;
+        std::string help;
+        std::string arglist;
+        size_t args;
+    };
 
     class Console {
         public:
@@ -56,9 +70,22 @@ namespace CppReadline {
              * If the command already existed, it overwrites the previous entry.
              *
              * @param s The name of the command as inserted by the user.
-             * @param f The function that will be called once the user writes the command.
+             * @param f The ConsoleCommand with the function that will be called once the user writes the command.
              */
-            void registerCommand(const std::string & s, CommandFunction f);
+            void registerCommand(const std::string & s, ConsoleCommand f);
+
+            /**
+             * @brief This function registers a new command within the Console.
+             *
+             * If the command already existed, it overwrites the previous entry.
+             *
+             * @param s The name of the command as inserted by the user.
+             * @param f The function that will be called once the user writes the command.
+	     * @param helptext The help text describing the purpose of the command
+	     * @param numArgs The number of arguments the command expects at least
+	     * @param arglist A string listing the required arguments for the command, printed when parameters are missing
+             */
+             void registerCommand(const std::string & s, CommandFunction f, std::string helptext, size_t numArgs, std::string arglist = "");
 
             /**
              * @brief This function returns a list with the currently available commands.

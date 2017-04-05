@@ -21,7 +21,7 @@ namespace CppReadline {
     }  /* namespace  */
 
     struct Console::Impl {
-        using RegisteredCommands = std::unordered_map<std::string,Console::CommandFunction>;
+        using RegisteredCommands = std::unordered_map<std::string,CppReadline::ConsoleCommand>;
 
         ::std::string       greeting_;
         // These are hardcoded commands. They do not do anything and are catched manually in the executeCommand function.
@@ -49,31 +49,45 @@ namespace CppReadline {
 
         // These are default hardcoded commands.
         // Help command lists available commands.
-        pimpl_->commands_["help"] = [this](const Arguments &){
-            auto commands = getRegisteredCommands();
-            std::cout << "Available commands are:\n";
-            for ( auto & command : commands ) std::cout << "\t" << command << "\n";
-            return ReturnCode::Ok;
-        };
+        pimpl_->commands_["help"] =
+	    ConsoleCommand(
+			   [this](const Arguments &){
+			       auto commands = getRegisteredCommands();
+			       std::cout << "Available commands are:\n";
+			       for ( auto & command : commands ) std::cout << "\t" << command << "\n";
+			       return ReturnCode::Ok;
+			   },
+			   "Provide help on using this console",
+			   0);
+						       
         // Run command executes all commands in an external file.
-        pimpl_->commands_["run"] =  [this](const Arguments & input) {
-            if ( input.size() < 2 ) { std::cout << "Usage: " << input[0] << " script_filename\n"; return 1; }
-            return executeFile(input[1]);
-        };
-        // Quit and Exit simply terminate the console.
-        pimpl_->commands_["quit"] = [this](const Arguments &) {
-            return ReturnCode::Quit;
-        };
+        pimpl_->commands_["run"] =
+	    ConsoleCommand(
+			   [this](const Arguments & input) {
+			       return executeFile(input.at(1));
+			   },
+			   "Run the provided script",
+			   1, "SCRIPT_FILENAME");
 
-        pimpl_->commands_["exit"] = [this](const Arguments &) {
-            return ReturnCode::Quit;
-        };
+        // Quit and Exit simply terminate the console.
+	ConsoleCommand quit = ConsoleCommand(
+					     [this](const Arguments &) {
+					         return ReturnCode::Quit;
+					     },
+					     "Quit the console",0);
+        pimpl_->commands_["quit"] = quit;
+	pimpl_->commands_["exit"] = quit;
     }
 
     Console::~Console() = default;
 
-    void Console::registerCommand(const std::string & s, CommandFunction f) {
+    void Console::registerCommand(const std::string & s, ConsoleCommand f) {
         pimpl_->commands_[s] = f;
+    }
+
+    void Console::registerCommand(const std::string & s, CommandFunction f, std::string helptext, size_t numArgs, std::string arglist) {
+        ConsoleCommand c = ConsoleCommand(f,helptext,numArgs,arglist);
+	this->registerCommand(s,c);
     }
 
     std::vector<std::string> Console::getRegisteredCommands() const {
@@ -126,11 +140,20 @@ namespace CppReadline {
         if ( inputs.size() == 0 ) return ReturnCode::Ok;
 
         Impl::RegisteredCommands::iterator it;
-        if ( ( it = pimpl_->commands_.find(inputs[0]) ) != end(pimpl_->commands_) ) {
-            return static_cast<int>((it->second)(inputs));
+	// Command exists
+        if ( ( it = pimpl_->commands_.find(inputs.at(0)) ) != end(pimpl_->commands_) ) {
+	  // Number of arguments is sufficient
+	    if(inputs.size() > it->second.args) {
+                return static_cast<int>((it->second.func)(inputs));
+	    }
+	    else {
+	        std::cout << "Usage: " << inputs.at(0) << " " << it->second.arglist << std::endl;
+	        std::cout << "       " << it->second.help << std::endl;
+	        return ReturnCode::Error;
+	    }
         }
 
-        std::cout << "Command '" << inputs[0] << "' not found.\n";
+        std::cout << "Command '" << inputs.at(0) << "' not found.\n";
         return ReturnCode::Error;
     }
 

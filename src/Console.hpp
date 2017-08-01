@@ -154,6 +154,8 @@ namespace CppReadline {
              */
             void reserveConsole();
 
+            std::vector<std::string> split(std::string str, std::string delims = " ,");
+
             // GNU newline interface to our commands.
             using commandCompleterFunction = char**(const char * text, int start, int end);
             using commandIteratorFunction = char*(const char * text, int state);

@@ -127,16 +127,53 @@ namespace CppReadline {
         return pimpl_->greeting_;
     }
 
-    int Console::executeCommand(const std::string & command) {
-        // Convert input to vector
-        std::vector<std::string> inputs;
-        {
-            std::istringstream iss(command);
-            std::copy(std::istream_iterator<std::string>(iss),
-                    std::istream_iterator<std::string>(),
-                    std::back_inserter(inputs));
+    std::vector<std::string> Console::split(std::string str, std::string delims) {
+
+        // If the input string is empty, simply return empty container
+        if(str.empty()) {
+	  return std::vector<std::string>();
         }
 
+        // Else we have data, clear the default elements and chop the string:
+        std::vector<std::string> elems;
+
+        // Add the string identifiers as special delimiters
+        delims += "\'\"";
+
+        // Loop through the string
+        std::size_t prev = 0, sprev = 0, pos;
+        char ins = 0;
+        while((pos = str.find_first_of(delims, sprev)) != std::string::npos) {
+            sprev = pos + 1;
+
+            // FIXME: handle escape
+            if(str[pos] == '\'' || str[pos] == '\"') {
+                if(!ins) {
+                    ins = str[pos];
+                } else if(ins == str[pos]) {
+                    ins = 0;
+                }
+                continue;
+            }
+            if(ins) {
+                continue;
+            }
+
+            if(pos > prev) {
+                elems.push_back(str.substr(prev, pos - prev));
+            }
+            prev = pos + 1;
+        }
+        if(prev < str.length()) {
+            elems.push_back(str.substr(prev, std::string::npos));
+        }
+
+        return elems;
+    }
+
+    int Console::executeCommand(const std::string & command) {
+        // Convert input to vector
+        std::vector<std::string> inputs = split(command);
         if ( inputs.size() == 0 ) return ReturnCode::Ok;
 
         Impl::RegisteredCommands::iterator it;
@@ -193,7 +230,6 @@ namespace CppReadline {
 
         std::string line(buffer);
         free(buffer);
-
         return executeCommand(line);
     }
 

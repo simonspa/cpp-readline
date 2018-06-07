@@ -59,7 +59,7 @@ namespace CppReadline {
 			   },
 			   "Provide help on using this console",
 			   0);
-						       
+
         // Run command executes all commands in an external file.
         pimpl_->commands_["run"] =
 	    ConsoleCommand(
@@ -71,7 +71,7 @@ namespace CppReadline {
 
         // Quit and Exit simply terminate the console.
 	ConsoleCommand quit = ConsoleCommand(
-					     [this](const Arguments &) {
+					     [](const Arguments &) {
 					         return ReturnCode::Quit;
 					     },
 					     "Quit the console",0);
